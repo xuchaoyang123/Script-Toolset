@@ -40,7 +40,7 @@ if os.path.exists(Conf):
             if "@"  in line:
                 Mont[line.strip('@').split()[0]]=line.strip('@').split()[1]
 else:
-    print "ERROR: File [ %s ] was not found!!!"%(Conf)
+    print("ERROR: File [ %s ] was not found!!!" % (Conf))
 
 #进行操作远程挂载
 for ip in Ip:

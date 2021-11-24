@@ -67,6 +67,7 @@ for ip in Ip:
                         #将变量远程写入到目标服务器文件中
                         Remote_Uuid = os.system("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \"echo '%s' >> %s\" " % (Pass,ip,Port,Temp_Uuid, File))
 
+
                         #挂载前将老data目录进行卸载
                         #umount /data
                         os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \" umount /data\"  " % (Pass,ip,Port))

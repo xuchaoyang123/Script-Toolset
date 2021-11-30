@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 ##############################
-#Version:1.9
+#Version:2.0
 #脚本作用: 批量操作多个服务器将磁盘进行UUID方式挂载。
 #explain:
 #python2.7  无需安装python
@@ -13,6 +13,7 @@
 import io
 import os
 import sys
+import re
 
 #可调整部分
 File="/etc/fstab" #写入的配置文件位置
@@ -25,23 +26,24 @@ Mont={}           #不需要填写,通过配置文件自动渲染!
 
 
 
-
 #判断配置文件是否存在,不存在进行提示
 if os.path.exists(Conf):
     ##通过读取指定的conf文件内容,将ip和挂载信息追加到Ip和Mount中.
     with  io.open(Conf,encoding='utf-8') as f:
         for line in f:
             #如果该行内包含#则代表是注释
-            #把行内包含#和@剩余的内容识别为操作的ip.
-            if  "#" not in line and "@" not in line :
+            #是数字的识别为ip地址.
+            if  "#" not in line and re.findall(r'\d+.\d+.\d+.\d+',line):
                 #过滤掉配置文件中空行内容.
                 if line.strip() != '':
                     Ip.append(line.strip())
-            #文件中包含@的行识别为挂载设备信息.
-            if "@"  in line:
+            #是字符串的识别为挂载设备信息.
+            if "#" not in line and re.findall(r'\D+\D+',line):
                 Mont[line.strip('@').split()[0]]=line.strip('@').split()[1]
 else:
     print("ERROR: File [ %s ] was not found!!!" % (Conf))
+#
+
 
 #进行操作远程挂载
 for ip in Ip:
@@ -71,7 +73,7 @@ for ip in Ip:
 
                         #挂载前将老data目录进行卸载
                         #umount /data
-                        os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \" umount /data\"  " % (Pass,ip,Port))
+                        os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \" umount /data  \"  " % (Pass,ip,Port))
 
                         #进行挂载生效
                         #print(os.popen("echo ok")).read()

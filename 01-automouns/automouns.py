@@ -1,31 +1,42 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 ##############################
-#Version:2.0
+#Version:2.1
 #脚本作用: 批量操作多个服务器将磁盘进行UUID方式挂载。
 #explain:
 #python2.7  无需安装python
-#1 无需ssh免密,可直接远程操作
-#2 磁盘格式化后,自动识别格式化的类型进行文件写入,无需人工干预
-#3 需要创建依赖的配置文件默认名字为conf.txt填写信息:#为注释
+#1 优化执行速度,使用多进程操作.
+#2 无需ssh免密,可直接远程操作
+#3 磁盘格式化后,自动识别格式化的类型进行文件写入,无需人工干预
+#4 需要创建依赖的配置文件默认名字为conf.txt填写信息:#为注释
+#配置文件demo
+# vim conf.txt
+# nvme0n1 data0
+# nvme1n1 data1
+# nvme2n1 data2
+# nvme3n1 data3
+# 192.168.1.10
+# 192.168.1.11
 ##############################
 
 import io
 import os
 import sys
 import re
+import time
+from multiprocessing import Process
 
-#可调整部分
-File="/etc/fstab" #写入的配置文件位置
-Pass="123456"  #服务器的统一密码
-Port=22        #服务器的统一端口
-Conf='conf.txt'   #读取依赖的配置文件名
+# 可调整部分
+File = "/etc/fstab"  # 写入的配置文件位置
+Pass = "123456"  # 服务器的统一密码
+Port = 22  # 服务器的统一端口
+Conf = 'conf.txt'  # 读取依赖的配置文件名
 
-Ip=[]             #不需要填写,通过配置文件自动渲染!
-Mont={}           #不需要填写,通过配置文件自动渲染!
+Ip = []  # 不需要填写,通过配置文件自动渲染!
+Mont = {}  # 不需要填写,通过配置文件自动渲染!
 
 
-
+#定义处理配置文件数据功能
 #判断配置文件是否存在,不存在进行提示
 if os.path.exists(Conf):
     ##通过读取指定的conf文件内容,将ip和挂载信息追加到Ip和Mount中.
@@ -35,21 +46,18 @@ if os.path.exists(Conf):
             #是数字的识别为ip地址.
             if  "#" not in line and re.findall(r'\d+.\d+.\d+.\d+',line):
                 #过滤掉配置文件中空行内容.
-                if line.strip() != '':
+                if line != '':
                     Ip.append(line.strip())
             #是字符串的识别为挂载设备信息.
             if "#" not in line and re.findall(r'\D+\D+',line):
                 Mont[line.strip('@').split()[0]]=line.strip('@').split()[1]
 else:
     print("ERROR: File [ %s ] was not found!!!" % (Conf))
-#
 
 
-#进行操作远程挂载
-for ip in Ip:
-      print("============> %s <========="%(ip))
-      for k in Mont:
-                #自动去判断磁盘是否是ext4或者xfs
+def Exec(k):
+    for ip in Ip:
+        #自动去判断磁盘是否是ext4或者xfs
                 Type=os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no  blkid | grep %s  | awk -F '\"' '{print $4}'   "%(Pass,ip,Port,k)).read().strip()
                 # #如果没有格式化进行输出提醒
                 if Type not in {"ext4","xfs"}:
@@ -80,4 +88,12 @@ for ip in Ip:
                         os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \" mount -a\"  " % (Pass,ip,Port))
 
                         #输出最新挂载信息
-                        print(os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \"lsblk | grep %s \""%(Pass,ip,Port,k)).read())
+                        print(ip,os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no \"lsblk | grep %s \""%(Pass,ip,Port,k)).read().strip())
+
+
+if __name__ == '__main__':
+
+    #进行操作远程挂载
+    for k in Mont:
+        p = Process(target=Exec, args=(k,))
+        p.start()

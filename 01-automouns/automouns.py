@@ -56,8 +56,8 @@ else:
     print("ERROR: File [ %s ] was not found!!!" % (Conf))
 
 
-def Exec(k):
-    for ip in Ip:
+def Exec(ip):
+    for k in Mont:
         #自动去判断磁盘是否是ext4或者xfs
                 Type=os.popen("sshpass -p %s ssh root@%s -p %s -o StrictHostKeyChecking=no  blkid | grep %s  | awk -F '\"' '{print $4}'   "%(Pass,ip,Port,k)).read().strip()
                 # #如果没有格式化进行输出提醒
@@ -95,6 +95,6 @@ def Exec(k):
 if __name__ == '__main__':
 
     #进行操作远程挂载
-    for k in Mont:
-        p = Process(target=Exec, args=(k,))
+    for ip in Ip:
+        p = Process(target=Exec, args=(ip,))
         p.start()

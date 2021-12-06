@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 ##############################
-#Version:2.1
+#Version:2.2
 #脚本作用: 批量操作多个服务器将磁盘进行UUID方式挂载。
 #explain:
 #python2.7  无需安装python

@@ -24,7 +24,7 @@ import os
 import sys
 import re
 import time
-from multiprocessing import Process
+from threading import Thread
 
 # 可调整部分
 File = "/etc/fstab"  # 写入的配置文件位置
@@ -96,5 +96,5 @@ if __name__ == '__main__':
 
     #进行操作远程挂载
     for ip in Ip:
-        p = Process(target=Exec, args=(ip,))
+        p = Thread(target=Exec, args=(ip,))
         p.start()

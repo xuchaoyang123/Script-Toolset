@@ -19,9 +19,14 @@
      配置文件中空格随意添加不受影响
      配置文件中设备信息和ip列表那个在上那个在下都没关系,程序不受顺序影响.
      vim conf.txt
-     
+     ![image](https://github.com/xuchaoyang123/Script-Toolset/blob/main/01-automouns/Photo/1.png)
 
 #2.执行脚本进行挂载.
     python  automount.py 
+    ![image](https://github.com/xuchaoyang123/Script-Toolset/blob/main/01-automouns/Photo/2.png)
+    
+    
+    重复执行的话,因为检查到磁盘已经挂载到设备上了,所以会提示 已经存在.
+    ![image](https://github.com/xuchaoyang123/Script-Toolset/blob/main/01-automouns/Photo/3.png)
     
 ```
